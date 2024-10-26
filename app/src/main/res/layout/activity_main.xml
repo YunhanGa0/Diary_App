@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.example.diary.RichEditText
+        android:id="@+id/richEditText"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top|start"
+        android:hint="开始写日记..." />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/boldButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="粗体" />
+
+        <Button
+            android:id="@+id/italicButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="斜体" />
+
+        <Button
+            android:id="@+id/underlineButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="下划线" />
+    </LinearLayout>
+</LinearLayout>
