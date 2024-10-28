@@ -1,35 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:background="#FFFFFF"
     android:elevation="4dp"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:gravity="center"
+    android:layout_gravity="bottom">
 
     <ImageButton
-        android:id="@+id/boldButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="粗体"
+        android:id="@+id/voiceButton"
+        style="@style/ToolbarImageButton"
+        android:contentDescription="语音"
+        android:src="@android:drawable/ic_btn_speak_now" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        style="@style/ToolbarImageButton"
+        android:contentDescription="图片"
+        android:src="@android:drawable/ic_menu_gallery" />
+
+    <ImageButton
+        android:id="@+id/drawButton"
+        style="@style/ToolbarImageButton"
+        android:contentDescription="手写"
         android:src="@android:drawable/ic_menu_edit" />
 
     <ImageButton
-        android:id="@+id/italicButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="斜体"
-        android:src="@android:drawable/ic_menu_edit" />
+        android:id="@+id/checklistButton"
+        style="@style/ToolbarImageButton"
+        android:contentDescription="清单"
+        android:src="@android:drawable/ic_menu_agenda" />
 
     <ImageButton
-        android:id="@+id/underlineButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="下划线"
-        android:src="@android:drawable/ic_menu_edit" />
+        android:id="@+id/formatButton"
+        style="@style/ToolbarImageButton"
+        android:contentDescription="格式"
+        android:src="@android:drawable/ic_menu_sort_by_size" />
 
 </LinearLayout>
-

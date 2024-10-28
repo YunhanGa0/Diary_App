@@ -6,4 +6,21 @@
     </style>
 
     <style name="Theme.Diary" parent="Base.Theme.Diary" />
+
+    <!-- 格式化按钮样式 -->
+    <style name="FormatButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- 工具栏按钮样式 -->
+    <style name="ToolbarImageButton">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
 </resources>

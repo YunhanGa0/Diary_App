@@ -1,79 +1,73 @@
 package com.example.diary;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.diary.model.Note;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.diary.adapter.NoteAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private RichEditText richEditText;
-    private View floatingToolbar;
+    private RecyclerView recyclerView;
+    private NoteAdapter adapter;
+    private FloatingActionButton fabNewNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        richEditText = findViewById(R.id.richEditText);
-        floatingToolbar = getLayoutInflater().inflate(R.layout.floating_toolbar, null);
+        initViews();
+        setupListeners();
+    }
 
-        ImageButton boldButton = floatingToolbar.findViewById(R.id.boldButton);
-        ImageButton italicButton = floatingToolbar.findViewById(R.id.italicButton);
-        ImageButton underlineButton = floatingToolbar.findViewById(R.id.underlineButton);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadNotes();
+    }
 
-        boldButton.setOnClickListener(v -> richEditText.toggleBold());
-        italicButton.setOnClickListener(v -> richEditText.toggleItalic());
-        underlineButton.setOnClickListener(v -> richEditText.toggleUnderline());
+    private void initViews() {
+        // 初始化RecyclerView
+        recyclerView = findViewById(R.id.notesRecyclerView);
+        adapter = new NoteAdapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        richEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                showFloatingToolbar();
-                return true;
-            }
+        // 初始化悬浮按钮
+        fabNewNote = findViewById(R.id.fabNewNote);
+    }
 
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
-            }
+    private void setupListeners() {
+        // 设置笔记点击监听
+        adapter.setOnNoteClickListener(note -> {
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            intent.putExtra("note_id", note.getId());
+            startActivity(intent);
+        });
 
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                hideFloatingToolbar();
-            }
+        // 设置新建笔记按钮点击监听
+        fabNewNote.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            startActivity(intent);
         });
     }
 
-    private void showFloatingToolbar() {
-        if (floatingToolbar.getParent() == null) {
-            ((ViewGroup) getWindow().getDecorView()).addView(floatingToolbar);
-        }
-        floatingToolbar.setVisibility(View.VISIBLE);
-        positionFloatingToolbar();
-    }
-
-    private void hideFloatingToolbar() {
-        floatingToolbar.setVisibility(View.GONE);
-    }
-
-    private void positionFloatingToolbar() {
-        int[] location = new int[2];
-        richEditText.getLocationInWindow(location);
-
-        int x = location[0];
-        int y = location[1] - floatingToolbar.getHeight() - 20;
-
-        floatingToolbar.setX(x);
-        floatingToolbar.setY(Math.max(0, y));
+    private void loadNotes() {
+        // TODO: 从数据库加载笔记列表
+        // 临时测试代码
+        List<Note> testNotes = new ArrayList<>();
+        Note note = new Note();
+        note.setTitle("测试笔记");
+        note.setContent("这是一个测试笔记");
+        testNotes.add(note);
+        
+        adapter.setNotes(testNotes);
     }
 }
