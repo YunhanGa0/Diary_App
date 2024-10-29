@@ -5,12 +5,66 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="我的日记"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="8dp">
+
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@null"
+                android:hint="搜索日记..."
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/notesRecyclerView"
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
-        android:clipToPadding="false"/>
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    <!-- 空状态提示 -->
+    <LinearLayout
+        android:id="@+id/emptyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="没有找到笔记"
+            android:textAlignment="center"
+            android:textColor="#666666"/>
+
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabNewNote"
