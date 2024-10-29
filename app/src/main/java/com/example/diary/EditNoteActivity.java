@@ -1,29 +1,67 @@
 package com.example.diary;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import android.Manifest;
+import android.net.Uri;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import com.example.diary.databinding.ActivityEditNoteBinding;
+import com.example.diary.dialog.MoodPickerDialog;
 import com.example.diary.model.Note;
 import com.example.diary.dialog.ColorPickerDialog;
 import com.example.diary.widget.RichEditText;
 import com.example.diary.db.NoteDao;
+
+import java.io.File;
+import android.graphics.Bitmap;
+
+import java.util.ArrayList;
+
+import android.graphics.BitmapFactory;
 
 public class EditNoteActivity extends AppCompatActivity implements RichEditText.OnFormatStateChangeListener {
     private ActivityEditNoteBinding binding;
     private Note currentNote;
     private NoteDao noteDao;
 
+    private static final int REQUEST_IMAGE_PICK = 1;
+    private static final int REQUEST_AUDIO_PERMISSION = 2;
+    private static final int REQUEST_IMAGE_PERMISSION = 3;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // 设置返按钮
+        setSupportActionBar(binding.toolbar);  // 确保你的布局中 Toolbar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         noteDao = new NoteDao(this);
         setupToolbar();
@@ -36,6 +74,16 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
         } else {
             currentNote = new Note();
         }
+
+        binding.btnAddImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkImagePermissionAndPick();
+            }
+        });
+
+        // 设置心情按钮点击事件
+        binding.btnMood.setOnClickListener(v -> showMoodPicker());
     }
 
     private void setupToolbar() {
@@ -168,27 +216,40 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
     private void saveNote() {
         String title = binding.titleEditText.getText().toString().trim();
         String content = binding.contentEditText.getText().toString().trim();
-
+        
+        // 如果标题和内容都为空，直接退出不保存
         if (title.isEmpty() && content.isEmpty()) {
-            Toast.makeText(this, "标题和内容不能都为空", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_CANCELED);
+            finish();
             return;
         }
-
+        
+        // 标题为空时使用默认标题
+        if (title.isEmpty()) {
+            title = "未命名笔记";
+        }
+        
+        // 如果是新建笔记
+        if (currentNote == null) {
+            currentNote = new Note();
+            currentNote.setCreateTime(System.currentTimeMillis());
+        }
+        
+        // 更新笔记内容
         currentNote.setTitle(title);
         currentNote.setContent(content);
         currentNote.setUpdateTime(System.currentTimeMillis());
-
-        if (currentNote.getId() == 0) {
-            // 新建笔记
-            long id = noteDao.insertNote(currentNote);
-            currentNote.setId(id);
-        } else {
-            // 更新笔记
-            noteDao.updateNote(currentNote);
+        
+        // 保存到数据库
+        try {
+            noteDao.saveNote(currentNote);
+            Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_OK);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "保存失败：" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
-        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-        finish();
     }
 
     @Override
@@ -201,8 +262,8 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         
-        if (id == android.R.id.home) {
-            finish();
+        if (id == android.R.id.home) {  // 处理左上角返回按钮
+            onBackPressed();  // 调用同的返回逻辑
             return true;
         } else if (id == R.id.action_save) {
             saveNote();
@@ -238,5 +299,215 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
     protected void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+
+     private void checkImagePermissionAndPick() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) 
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_IMAGE_PERMISSION);
+        } else {
+            pickImage();
+        }
+    }
+
+    private void pickImage() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, REQUEST_IMAGE_PICK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "选择图片失败：" + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_IMAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                pickImage();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_IMAGE_PICK && resultCode == RESULT_OK && data != null) {
+            try {
+                Uri imageUri = data.getData();
+                if (imageUri != null) {
+                    // 处理选中的图片
+                    insertImage(imageUri);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, "插入图片失败：" + e.getMessage(), 
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void insertImage(Uri imageUri) {
+        try {
+            // 将图片复制到应用私有目录
+            String fileName = "image_" + System.currentTimeMillis() + ".jpg";
+            File imageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
+            
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            
+            inputStream.close();
+            outputStream.close();
+            
+            // 保存图片路径
+            if (currentNote != null && currentNote.getImagePaths() == null) {
+                currentNote.setImagePaths(new ArrayList<>());
+            }
+            if (currentNote != null) {
+                currentNote.getImagePaths().add(imageFile.getAbsolutePath());
+            }
+            
+            // 插入图片到编辑器
+            int start = Math.max(0, binding.contentEditText.getSelectionStart());
+            SpannableString imageSpan = new SpannableString(" ");
+            
+            // 加载并压缩图片
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+            
+            // 计算压缩比例
+            int maxWidth = getResources().getDisplayMetrics().widthPixels;
+            int scale = 1;
+            while (options.outWidth / scale > maxWidth) {
+                scale *= 2;
+            }
+            
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = scale;
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+            
+            // 创建图片视图
+            ImageView imageView = new ImageView(this);
+            imageView.setAdjustViewBounds(true);
+            imageView.setMaxWidth(maxWidth);
+            imageView.setImageBitmap(bitmap);
+            
+            imageSpan.setSpan(new ImageSpan(this, bitmap), 0, 1, 
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            Editable editable = binding.contentEditText.getText();
+            if (editable != null) {
+                editable.insert(start, "\n");
+                editable.insert(start + 1, imageSpan);
+                editable.insert(start + 2, "\n");
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "处理图片失败：" + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void copyImageToFile(Uri sourceUri, File destFile) throws IOException {
+        InputStream in = getContentResolver().openInputStream(sourceUri);
+        OutputStream out = new FileOutputStream(destFile);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        in.close();
+        out.close();
+    }
+
+    // 添加返回键保存提示
+    @Override
+    public void onBackPressed() {
+        if (hasUnsavedChanges()) {
+            new AlertDialog.Builder(this)
+                .setTitle("保存更改")
+                .setMessage("是否保存更改？")
+                .setPositiveButton("保存", (dialog, which) -> {
+                    saveNote();
+                })
+                .setNegativeButton("不保存", (dialog, which) -> {
+                    setResult(RESULT_CANCELED);
+                    finish();  // 直接退出，不保存
+                })
+                .setNeutralButton("取消", null)
+                .show();
+        } else {
+            setResult(RESULT_CANCELED);
+            finish();  // 如果没有更改，直接退出
+        }
+    }
+
+    // 检查是否有未保存的更改
+    private boolean hasUnsavedChanges() {
+        String currentTitle = binding.titleEditText.getText().toString().trim();
+        String currentContent = binding.contentEditText.getText().toString().trim();
+        
+        // 如果是新建笔记
+        if (currentNote == null) {
+            // 只有当标题或内容不为空时，才认为有未保存的更改
+            return !currentTitle.isEmpty() || !currentContent.isEmpty();
+        }
+        
+        // 如果是编辑已有笔记，比较内容是否有变化
+        return !currentTitle.equals(currentNote.getTitle()) ||
+               !currentContent.equals(currentNote.getContent());
+    }
+
+    private void showMoodPicker() {
+        MoodPickerDialog dialog = new MoodPickerDialog(this, mood -> {
+            if (currentNote != null) {
+                currentNote.setMood(mood);
+                showMoodToast(mood);
+            }
+        });
+        dialog.show();
+    }
+
+    private void showMoodToast(int mood) {
+        String moodText;
+        switch (mood) {
+            case 0:
+                moodText = "非常伤心";
+                break;
+            case 1:
+                moodText = "伤心";
+                break;
+            case 2:
+                moodText = "一般";
+                break;
+            case 3:
+                moodText = "开心";
+                break;
+            case 4:
+                moodText = "非常开心";
+                break;
+            case 5:
+                moodText = "生气";
+                break;
+            default:
+                moodText = "未知心情";
+        }
+        Toast.makeText(this, "您选择了：" + moodText, Toast.LENGTH_SHORT).show();
     }
 }

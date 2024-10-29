@@ -8,7 +8,9 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +23,8 @@ import com.example.diary.db.NoteDao;
 import com.example.diary.model.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.diary.adapter.NoteAdapter;
+import com.google.android.material.search.SearchBar;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         noteDao = new NoteDao(this);
         initViews();
-        setupSearchView();
+        setupSearchBar();
+        setupListeners();
     }
 
     private void initViews() {
@@ -50,45 +55,51 @@ public class MainActivity extends AppCompatActivity {
         binding.recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
     }
 
-    private void setupSearchView() {
-        binding.searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                searchNotes(s.toString());
-            }
-        });
-
-        // 处理搜索按钮点击
-        binding.searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+    private void setupSearchBar() {
+        EditText searchEditText = binding.searchEditText;
+        searchEditText.setHint("搜索标题、内容或心情");
+        
+        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                searchNotes(v.getText().toString());
-                // 隐藏键盘
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                hideKeyboard(v);
                 return true;
             }
             return false;
         });
+        
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchNotes(s.toString().trim());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void searchNotes(String query) {
         if (query.isEmpty()) {
-            loadNotes();  // 如果搜索框为空，显示所有笔记
+            loadNotes();  // 显示所有笔记
+            binding.emptyView.getRoot().setVisibility(View.GONE);
         } else {
             List<Note> searchResults = noteDao.searchNotes(query);
             adapter.setNotes(searchResults);
             
             // 更新空状态视图
             if (searchResults.isEmpty()) {
-                binding.emptyView.setVisibility(View.VISIBLE);
+                binding.emptyView.getRoot().setVisibility(View.VISIBLE);
+                binding.emptyView.emptyText.setText("未找到匹配的笔记");
             } else {
-                binding.emptyView.setVisibility(View.GONE);
+                binding.emptyView.getRoot().setVisibility(View.GONE);
             }
         }
     }
@@ -106,9 +117,10 @@ public class MainActivity extends AppCompatActivity {
         
         // 如果没有笔记，显示空状态
         if (notes.isEmpty()) {
-            binding.emptyView.setVisibility(View.VISIBLE);
+            binding.emptyView.getRoot().setVisibility(View.VISIBLE);
+            binding.emptyView.emptyText.setText("还没有笔记，点击右下角添加");
         } else {
-            binding.emptyView.setVisibility(View.GONE);
+            binding.emptyView.getRoot().setVisibility(View.GONE);
         }
     }
 
@@ -123,5 +135,21 @@ public class MainActivity extends AppCompatActivity {
             })
             .setNegativeButton("取消", null)
             .show();
+    }
+
+    private void setupListeners() {
+        // 使用新的 FAB ID
+        binding.fabAddNote.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            startActivity(intent);
+        });
+
+        adapter.setOnNoteClickListener(note -> {
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            intent.putExtra("note_id", note.getId());
+            startActivity(intent);
+        });
+
+        adapter.setOnNoteLongClickListener(this::showDeleteConfirmDialog);
     }
 }

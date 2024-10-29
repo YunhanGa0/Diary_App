@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="mood_0" type="id"/>
+    <item name="mood_1" type="id"/>
+    <item name="mood_2" type="id"/>
+    <item name="mood_3" type="id"/>
+    <item name="mood_4" type="id"/>
+    <item name="mood_5" type="id"/>
+</resources> 

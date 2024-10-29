@@ -3,29 +3,33 @@ package com.example.diary.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.diary.R;
 import com.example.diary.model.Note;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder> {
     private List<Note> notes = new ArrayList<>();
-    private OnNoteClickListener listener;
+    private OnNoteClickListener clickListener;
     private OnNoteLongClickListener longClickListener;
 
     public interface OnNoteClickListener {
         void onNoteClick(Note note);
     }
 
-    public interface OnNoteLongClickListener {
-        boolean onNoteLongClick(Note note);
+    public void setOnNoteClickListener(OnNoteClickListener listener) {
+        this.clickListener = listener;
     }
 
-    public void setOnNoteClickListener(OnNoteClickListener listener) {
-        this.listener = listener;
+    public interface OnNoteLongClickListener {
+        void onNoteLongClick(Note note);
     }
 
     public void setOnNoteLongClickListener(OnNoteLongClickListener listener) {
@@ -49,6 +53,20 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
     public void onBindViewHolder(@NonNull NoteViewHolder holder, int position) {
         Note note = notes.get(position);
         holder.bind(note);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onNoteClick(note);
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                longClickListener.onNoteLongClick(note);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -56,37 +74,51 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         return notes.size();
     }
 
-    class NoteViewHolder extends RecyclerView.ViewHolder {
-        private TextView titleText;
-        private TextView contentText;
-        private TextView timeText;
+    public static class NoteViewHolder extends RecyclerView.ViewHolder {
+        private final TextView titleTextView;
+        private final TextView contentTextView;
+        private final TextView timeTextView;
+        private final ImageView moodImageView;
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleText = itemView.findViewById(R.id.titleText);
-            contentText = itemView.findViewById(R.id.contentText);
-            timeText = itemView.findViewById(R.id.timeText);
-
-            itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && listener != null) {
-                    listener.onNoteClick(notes.get(position));
-                }
-            });
-
-            itemView.setOnLongClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && longClickListener != null) {
-                    return longClickListener.onNoteLongClick(notes.get(position));
-                }
-                return false;
-            });
+            titleTextView = itemView.findViewById(R.id.titleTextView);
+            contentTextView = itemView.findViewById(R.id.contentTextView);
+            timeTextView = itemView.findViewById(R.id.timeTextView);
+            moodImageView = itemView.findViewById(R.id.moodImageView);
         }
 
         public void bind(Note note) {
-            titleText.setText(note.getTitle());
-            contentText.setText(note.getContent());
-            timeText.setText(note.getFormattedTime()); // 你需要在Note类中实现这个方法
+            titleTextView.setText(note.getTitle());
+            contentTextView.setText(note.getContent());
+            String formattedTime = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date(note.getUpdateTime()));
+            timeTextView.setText(formattedTime);
+            int moodDrawable = getMoodDrawable(note.getMood());
+            if (moodDrawable != 0) {
+                moodImageView.setVisibility(View.VISIBLE);
+                moodImageView.setImageResource(moodDrawable);
+            } else {
+                moodImageView.setVisibility(View.GONE);
+            }
+        }
+
+        private int getMoodDrawable(int mood) {
+            switch (mood) {
+                case 0:
+                    return R.drawable.mood_0;
+                case 1:
+                    return R.drawable.mood_1;
+                case 2:
+                    return R.drawable.mood_2;
+                case 3:
+                    return R.drawable.mood_3;
+                case 4:
+                    return R.drawable.mood_4;
+                case 5:
+                    return R.drawable.mood_5;
+                default:
+                    return 0;
+            }
         }
     }
 }

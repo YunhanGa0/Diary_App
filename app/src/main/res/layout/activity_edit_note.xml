@@ -71,5 +71,23 @@
             android:src="@drawable/ic_format_color"
             android:contentDescription="颜色"/>
 
+        <ImageButton
+            android:id="@+id/btnAddImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_image"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:onClick=""/>
+
+        <ImageButton
+            android:id="@+id/btnMood"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_mood"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
+
 </LinearLayout>

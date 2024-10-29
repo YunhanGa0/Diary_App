@@ -3,6 +3,7 @@ package com.example.diary.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.List;
 
 public class Note {
     private long id;
@@ -12,6 +13,8 @@ public class Note {
     private long updateTime;
     private String category;
     private boolean isEncrypted;
+    private List<String> imagePaths;
+    private int mood; // 0-5 表示不同心情等级
 
     public Note() {
         this.createTime = System.currentTimeMillis();
@@ -78,5 +81,21 @@ public class Note {
     public String getFormattedTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         return sdf.format(new Date(updateTime));
+    }
+
+    public List<String> getImagePaths() {
+        return imagePaths;
+    }
+
+    public void setImagePaths(List<String> imagePaths) {
+        this.imagePaths = imagePaths;
+    }
+
+    public int getMood() {
+        return mood;
+    }
+
+    public void setMood(int mood) {
+        this.mood = mood;
     }
 }
