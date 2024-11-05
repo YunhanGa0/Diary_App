@@ -217,4 +217,28 @@ public class NoteDao {
             note.setId(id);
         }
     }
+
+    public List<Note> getNotesByMood(int mood) {
+        List<Note> notes = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        
+        Cursor cursor = db.query(
+            NoteContract.NoteEntry.TABLE_NAME,
+            null,
+            NoteContract.NoteEntry.COLUMN_MOOD + " = ?",
+            new String[]{String.valueOf(mood)},
+            null,
+            null,
+            NoteContract.NoteEntry.COLUMN_UPDATE_TIME + " DESC"
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                notes.add(cursorToNote(cursor));
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        
+        return notes;
+    }
 } 

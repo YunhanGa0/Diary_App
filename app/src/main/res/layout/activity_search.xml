@@ -27,7 +27,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@null"
-            android:hint="搜索标题、内容或心情"
+            android:hint="搜索标题或内容"
             android:textColorHint="@color/text_hint"
             android:textColor="@color/text_primary"
             android:imeOptions="actionSearch"
@@ -43,6 +43,82 @@
             android:padding="12dp"
             android:visibility="gone"/>
     </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="2dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="8dp">
+
+            <Button
+                android:id="@+id/moodVeryHappy"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="非常开心"
+                android:textSize="14sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"/>
+
+            <Button
+                android:id="@+id/moodHappy"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="开心"
+                android:textSize="14sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"/>
+
+            <Button
+                android:id="@+id/moodNeutral"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="一般"
+                android:textSize="14sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"/>
+
+            <Button
+                android:id="@+id/moodSad"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="伤心"
+                android:textSize="14sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"/>
+
+            <Button
+                android:id="@+id/moodVerySad"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="非常伤心"
+                android:textSize="14sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"/>
+
+            <Button
+                android:id="@+id/moodAngry"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="生气"
+                android:textSize="14sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"/>
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

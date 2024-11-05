@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
+        android:name=".DiaryApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -29,6 +30,10 @@
         <activity
             android:name=".EditNoteActivity"
             android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".SearchActivity" />
+        <activity 
+            android:name=".SettingsActivity"
+            android:label="设置" />
     </application>
 
 </manifest>

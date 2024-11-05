@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.diary.databinding.ActivityMainBinding;
 import com.example.diary.db.NoteDao;
@@ -41,46 +42,21 @@ public class MainActivity extends AppCompatActivity {
 
         noteDao = new NoteDao(this);
         initViews();
-        setupSearchBar();
         setupListeners();
         setupBottomNavigation();
         setupToolbar();
     }
 
     private void initViews() {
-        // 初始化RecyclerView
         adapter = new NoteAdapter();
         binding.recyclerView.setAdapter(adapter);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        // 添加分割线
-        binding.recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-    }
-
-    private void setupSearchBar() {
-        EditText searchEditText = binding.searchEditText;
-        searchEditText.setHint("搜索标题、内容或心情");
         
-        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                hideKeyboard(v);
-                return true;
-            }
-            return false;
-        });
+        // 使用 StaggeredGridLayoutManager 替换 LinearLayoutManager
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        binding.recyclerView.setLayoutManager(layoutManager);
         
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                searchNotes(s.toString().trim());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+        // 移除分割线
+        // binding.recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
     }
 
     private void hideKeyboard(View view) {
@@ -174,9 +150,5 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        binding.calendarButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CalendarActivity.class);
-            startActivity(intent);
-        });
     }
 }

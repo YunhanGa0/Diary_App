@@ -25,57 +25,33 @@
                 android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Diary日记"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"
+                        android:layout_marginStart="16dp"/>
 
                     <ImageButton
                         android:id="@+id/searchButton"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
                         android:src="@drawable/ic_search"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:padding="12dp"
                         android:contentDescription="搜索"/>
 
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"/>
-
-                    <ImageButton
-                        android:id="@+id/calendarButton"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_calendar"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="12dp"
-                        android:contentDescription="日历"/>
-                </LinearLayout>
+                </RelativeLayout>
 
             </androidx.appcompat.widget.Toolbar>
-
-            <!-- 搜索栏 -->
-            <LinearLayout
-                android:id="@+id/searchBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:padding="8dp">
-
-                <EditText
-                    android:id="@+id/searchEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:hint="搜索标题、内容或心情"
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:padding="8dp"/>
-            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
@@ -83,7 +59,12 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:clipToPadding="false"
-                android:padding="8dp"/>
+                android:padding="8dp"
+                android:columnWidth="160dp"
+                android:horizontalSpacing="8dp"
+                android:verticalSpacing="8dp"
+                android:stretchMode="columnWidth"
+                android:numColumns="2"/>
 
             <include
                 android:id="@+id/emptyView"

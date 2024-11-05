@@ -11,6 +11,7 @@ import com.example.diary.adapter.NoteAdapter;
 import com.example.diary.databinding.ActivitySearchBinding;
 import com.example.diary.db.NoteDao;
 import com.example.diary.model.Note;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchActivity extends AppCompatActivity {
@@ -27,18 +28,33 @@ public class SearchActivity extends AppCompatActivity {
         noteDao = new NoteDao(this);
         setupViews();
         setupListeners();
+        
+        showEmptyState();
+    }
+
+    private void showEmptyState() {
+        binding.emptyView.getRoot().setVisibility(View.VISIBLE);
+        binding.emptyView.emptyText.setText("输入关键词开始搜索");
+        adapter.setNotes(new ArrayList<>());
     }
 
     private void setupViews() {
         adapter = new NoteAdapter();
         binding.recyclerView.setAdapter(adapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         binding.searchEditText.requestFocus();
     }
 
     private void setupListeners() {
         binding.backButton.setOnClickListener(v -> finish());
+        binding.clearButton.setOnClickListener(v -> binding.searchEditText.setText(""));
+
+        binding.moodVeryHappy.setOnClickListener(v -> searchNotesByMood(4));
+        binding.moodHappy.setOnClickListener(v -> searchNotesByMood(3));
+        binding.moodNeutral.setOnClickListener(v -> searchNotesByMood(2));
+        binding.moodSad.setOnClickListener(v -> searchNotesByMood(1));
+        binding.moodVerySad.setOnClickListener(v -> searchNotesByMood(0));
+        binding.moodAngry.setOnClickListener(v -> searchNotesByMood(5));
 
         binding.searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -53,25 +69,32 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
-
-        binding.clearButton.setOnClickListener(v -> binding.searchEditText.setText(""));
-
-        binding.searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                searchNotes(binding.searchEditText.getText().toString().trim());
-                return true;
-            }
-            return false;
-        });
     }
 
     private void searchNotes(String query) {
+        if (query.isEmpty()) {
+            showEmptyState();
+            return;
+        }
+        
         List<Note> searchResults = noteDao.searchNotes(query);
         adapter.setNotes(searchResults);
         
         if (searchResults.isEmpty()) {
             binding.emptyView.getRoot().setVisibility(View.VISIBLE);
             binding.emptyView.emptyText.setText("未找到匹配的笔记");
+        } else {
+            binding.emptyView.getRoot().setVisibility(View.GONE);
+        }
+    }
+
+    private void searchNotesByMood(int mood) {
+        List<Note> results = noteDao.getNotesByMood(mood);
+        adapter.setNotes(results);
+        
+        if (results.isEmpty()) {
+            binding.emptyView.getRoot().setVisibility(View.VISIBLE);
+            binding.emptyView.emptyText.setText("没有找到相应心情的笔记");
         } else {
             binding.emptyView.getRoot().setVisibility(View.GONE);
         }
