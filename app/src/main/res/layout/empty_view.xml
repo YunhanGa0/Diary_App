@@ -4,22 +4,24 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="32dp">
 
     <ImageView
         android:id="@+id/emptyIcon"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:src="@drawable/ic_empty"
-        android:alpha="0.5"/>
+        android:alpha="0.6"
+        android:tint="@color/text_hint"/>
 
     <TextView
         android:id="@+id/emptyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="还没有笔记，点击右下角添加"
-        android:textColor="#666666"
-        android:textSize="16sp"/>
+        android:layout_marginTop="24dp"
+        android:text="还没有笔记，点击底部新建按钮添加"
+        android:textColor="@color/text_secondary"
+        android:textSize="16sp"
+        android:gravity="center"/>
 
 </LinearLayout> 

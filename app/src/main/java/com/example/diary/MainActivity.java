@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
         initViews();
         setupSearchBar();
         setupListeners();
+        setupBottomNavigation();
+        setupToolbar();
     }
 
     private void initViews() {
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         // 如果没有笔记，显示空状态
         if (notes.isEmpty()) {
             binding.emptyView.getRoot().setVisibility(View.VISIBLE);
-            binding.emptyView.emptyText.setText("还没有笔记，点击右下角添加");
+            binding.emptyView.emptyText.setText("还没有笔记，点击底部新建按钮添加");
         } else {
             binding.emptyView.getRoot().setVisibility(View.GONE);
         }
@@ -138,12 +140,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        // 使用新的 FAB ID
-        binding.fabAddNote.setOnClickListener(v -> {
-            Intent intent = new Intent(this, EditNoteActivity.class);
-            startActivity(intent);
-        });
-
         adapter.setOnNoteClickListener(note -> {
             Intent intent = new Intent(this, EditNoteActivity.class);
             intent.putExtra("note_id", note.getId());
@@ -151,5 +147,36 @@ public class MainActivity extends AppCompatActivity {
         });
 
         adapter.setOnNoteLongClickListener(this::showDeleteConfirmDialog);
+    }
+
+    private void setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.navigation_home) {
+                // 已经在主页，不需要操作
+                return true;
+            } else if (itemId == R.id.navigation_new_note) {
+                Intent intent = new Intent(this, EditNoteActivity.class);
+                startActivity(intent);
+                return false; // 不选中该项
+            } else if (itemId == R.id.navigation_settings) {
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return false; // 不选中该项
+            }
+            return false;
+        });
+    }
+
+    private void setupToolbar() {
+        binding.searchButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
+        });
+
+        binding.calendarButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CalendarActivity.class);
+            startActivity(intent);
+        });
     }
 }
