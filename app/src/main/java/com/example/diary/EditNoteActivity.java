@@ -41,6 +41,13 @@ import java.util.ArrayList;
 
 import android.graphics.BitmapFactory;
 
+import android.text.Html;
+import android.graphics.drawable.BitmapDrawable;
+
+import android.util.Log;
+
+import java.util.Arrays;
+
 public class EditNoteActivity extends AppCompatActivity implements RichEditText.OnFormatStateChangeListener {
     private ActivityEditNoteBinding binding;
     private Note currentNote;
@@ -209,46 +216,183 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
         currentNote = noteDao.getNoteById(noteId);
         if (currentNote != null) {
             binding.titleEditText.setText(currentNote.getTitle());
-            binding.contentEditText.setText(currentNote.getContent());
+            
+            Log.d("EditNoteActivity", "Loading note content: " + currentNote.getContent());
+            if (currentNote.getImagePaths() != null) {
+                Log.d("EditNoteActivity", "Image paths: " + currentNote.getImagePaths().toString());
+            }
+            
+            // 使用 Html.fromHtml 来加载富文本内容
+            Spanned spannedText = Html.fromHtml(currentNote.getContent(), Html.FROM_HTML_MODE_COMPACT, 
+                source -> {
+                    try {
+                        Log.d("EditNoteActivity", "Loading image from source: " + source);
+                        // 从应用私有目录加载图片
+                        File imageFile = new File(getFilesDir(), source);
+                        Log.d("EditNoteActivity", "Image file path: " + imageFile.getAbsolutePath());
+                        Log.d("EditNoteActivity", "Image file exists: " + imageFile.exists());
+                        
+                        if (imageFile.exists()) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                            if (bitmap != null) {
+                                Log.d("EditNoteActivity", "Successfully loaded bitmap: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+                                
+                                // 计算压缩后的尺寸
+                                int maxWidth = getResources().getDisplayMetrics().widthPixels - 200;
+                                int maxHeight = getResources().getDisplayMetrics().heightPixels / 2;
+                                
+                                float scaleWidth = (float) maxWidth / bitmap.getWidth();
+                                float scaleHeight = (float) maxHeight / bitmap.getHeight();
+                                float scale = Math.min(scaleWidth, scaleHeight);
+                                
+                                int newWidth = Math.round(bitmap.getWidth() * scale);
+                                int newHeight = Math.round(bitmap.getHeight() * scale);
+                                
+                                // 压缩图片
+                                Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+                                BitmapDrawable drawable = new BitmapDrawable(getResources(), resizedBitmap);
+                                drawable.setBounds(0, 0, newWidth, newHeight);
+                                
+                                // 创建新的 PathImageSpan
+                                PathImageSpan imageSpan = new PathImageSpan(drawable, source);
+                                SpannableString spannableString = new SpannableString("\uFFFC");
+                                spannableString.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                return drawable;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e("EditNoteActivity", "Error loading image: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                    return null;
+                }, null);
+            binding.contentEditText.setText(spannedText);
         }
     }
 
     private void saveNote() {
         String title = binding.titleEditText.getText().toString().trim();
-        String content = binding.contentEditText.getText().toString().trim();
+        Editable content = binding.contentEditText.getText();
         
-        // 如果标题和内容都为空，直接退出不保存
-        if (title.isEmpty() && content.isEmpty()) {
-            setResult(RESULT_CANCELED);
-            finish();
-            return;
-        }
+        Log.d("EditNoteActivity", "Saving note...");
         
-        // 标题为空时使用默认标题
+        // 确保标题不为空
         if (title.isEmpty()) {
             title = "未命名笔记";
         }
         
-        // 如果是新建笔记
         if (currentNote == null) {
             currentNote = new Note();
             currentNote.setCreateTime(System.currentTimeMillis());
+            currentNote.setImagePaths(new ArrayList<>());
+            Log.d("EditNoteActivity", "Created new note");
         }
         
-        // 更新笔记内容
-        currentNote.setTitle(title);
-        currentNote.setContent(content);
+        ImageSpan[] imageSpans = content.getSpans(0, content.length(), ImageSpan.class);
+        Log.d("EditNoteActivity", "Found " + imageSpans.length + " image spans");
+        
+        StringBuilder htmlContent = new StringBuilder();
+        int lastIndex = 0;
+        
+        // 处理文本和图片
+        for (ImageSpan span : imageSpans) {
+            int start = content.getSpanStart(span);
+            int end = content.getSpanEnd(span);
+            
+            // 添加图片前的文本
+            String text = content.subSequence(lastIndex, start).toString();
+            if (!text.isEmpty()) {
+                // 将换行符替换为 <br> 标签
+                text = text.replace("\n", "<br>");
+                htmlContent.append(text);
+            }
+            
+            // 添加图片标签
+            if (span instanceof PathImageSpan) {
+                String imagePath = ((PathImageSpan) span).getImagePath();
+                htmlContent.append("<img src=\"").append(imagePath).append("\">");
+            } else {
+                // 如果是普通的 ImageSpan，尝试从 currentNote 的 imagePaths 中获取
+                int currentImageIndex = Arrays.asList(imageSpans).indexOf(span);
+                if (currentNote.getImagePaths() != null && currentImageIndex < currentNote.getImagePaths().size()) {
+                    String imagePath = currentNote.getImagePaths().get(currentImageIndex);
+                    htmlContent.append("<img src=\"").append(imagePath).append("\">");
+                }
+            }
+            
+            lastIndex = end;
+        }
+        
+        // 添加剩余的文本
+        if (lastIndex < content.length()) {
+            String text = content.subSequence(lastIndex, content.length()).toString();
+            if (!text.isEmpty()) {
+                // 将换行符替换为 <br> 标签
+                text = text.replace("\n", "<br>");
+                htmlContent.append(text);
+            }
+        }
+        
+        Log.d("EditNoteActivity", "Final HTML content: " + htmlContent.toString());
+        
+        currentNote.setTitle(title); 
+        currentNote.setContent(htmlContent.toString());
         currentNote.setUpdateTime(System.currentTimeMillis());
         
-        // 保存到数据库
         try {
             noteDao.saveNote(currentNote);
+            Log.d("EditNoteActivity", "Note saved successfully");
             Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
             setResult(RESULT_OK);
             finish();
         } catch (Exception e) {
+            Log.e("EditNoteActivity", "Error saving note: " + e.getMessage());
             e.printStackTrace();
             Toast.makeText(this, "保存失败：" + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String convertToHtml(Editable content) {
+        // 处理图片和文本
+        StringBuilder html = new StringBuilder();
+        ImageSpan[] imageSpans = content.getSpans(0, content.length(), ImageSpan.class);
+        
+        int lastIndex = 0;
+        for (ImageSpan span : imageSpans) {
+            int start = content.getSpanStart(span);
+            int end = content.getSpanEnd(span);
+            
+            // 添加图片前的文本
+            String text = content.subSequence(lastIndex, start).toString();
+            html.append(Html.escapeHtml(text));
+            
+            // 保存图片到应用私有目录并添加图片标签
+            String imagePath = saveImageToFile(((BitmapDrawable)span.getDrawable()).getBitmap());
+            html.append("<img src=\"").append(imagePath).append("\">");
+            
+            lastIndex = end;
+        }
+        
+        // 添加最后的文本
+        if (lastIndex < content.length()) {
+            String text = content.subSequence(lastIndex, content.length()).toString();
+            html.append(Html.escapeHtml(text));
+        }
+        
+        return html.toString();
+    }
+
+    private String saveImageToFile(Bitmap bitmap) {
+        try {
+            String fileName = "img_" + System.currentTimeMillis() + ".jpg";
+            File file = new File(getFilesDir(), fileName);
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            fos.close();
+            return fileName;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -279,7 +423,7 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
     private void showDeleteConfirmDialog() {
         new AlertDialog.Builder(this)
             .setTitle("删除笔记")
-            .setMessage("确定要删除这篇笔记吗？")
+            .setMessage("确定要删除这篇笔记？")
             .setPositiveButton("删除", (dialog, which) -> {
                 deleteNote();
             })
@@ -359,10 +503,15 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
         try {
             // 将图片复制到应用私有目录
             String fileName = "image_" + System.currentTimeMillis() + ".jpg";
-            File imageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
+            File imageFile = new File(getFilesDir(), "images");
+            if (!imageFile.exists()) {
+                imageFile.mkdirs();
+            }
+            File destFile = new File(imageFile, fileName);
             
+            // 复制图片文件
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            FileOutputStream outputStream = new FileOutputStream(destFile);
             
             byte[] buffer = new byte[1024];
             int length;
@@ -373,54 +522,48 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
             inputStream.close();
             outputStream.close();
             
-            // 保存图片路径
-            if (currentNote != null && currentNote.getImagePaths() == null) {
-                currentNote.setImagePaths(new ArrayList<>());
-            }
-            if (currentNote != null) {
-                currentNote.getImagePaths().add(imageFile.getAbsolutePath());
-            }
-            
-            // 插入图片到编辑器
-            int start = Math.max(0, binding.contentEditText.getSelectionStart());
-            SpannableString imageSpan = new SpannableString(" ");
-            
             // 加载并压缩图片
             BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
-            
-            // 计算压缩比例
-            int maxWidth = getResources().getDisplayMetrics().widthPixels;
-            int scale = 1;
-            while (options.outWidth / scale > maxWidth) {
-                scale *= 2;
-            }
-            
             options.inJustDecodeBounds = false;
-            options.inSampleSize = scale;
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(destFile.getAbsolutePath(), options);
             
-            // 创建图片视图
-            ImageView imageView = new ImageView(this);
-            imageView.setAdjustViewBounds(true);
-            imageView.setMaxWidth(maxWidth);
-            imageView.setImageBitmap(bitmap);
-            
-            imageSpan.setSpan(new ImageSpan(this, bitmap), 0, 1, 
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            
-            Editable editable = binding.contentEditText.getText();
-            if (editable != null) {
-                editable.insert(start, "\n");
-                editable.insert(start + 1, imageSpan);
-                editable.insert(start + 2, "\n");
+            if (bitmap != null) {
+                // 计算压缩后的尺寸
+                int maxWidth = getResources().getDisplayMetrics().widthPixels - 200; // 增加左右边距
+                int maxHeight = getResources().getDisplayMetrics().heightPixels / 2; // 限制最大高度
+
+                float scaleWidth = (float) maxWidth / bitmap.getWidth();
+                float scaleHeight = (float) maxHeight / bitmap.getHeight();
+                float scale = Math.min(scaleWidth, scaleHeight); // 取最小的缩放比例，保持宽高比
+
+                int newWidth = Math.round(bitmap.getWidth() * scale);
+                int newHeight = Math.round(bitmap.getHeight() * scale);
+
+                // 压缩图片
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+                bitmap.recycle();
+                
+                // 插入图片到编辑器
+                String imagePath = "images/" + fileName;
+                SpannableString spannableString = new SpannableString("\uFFFC");
+                PathImageSpan imageSpan = new PathImageSpan(this, resizedBitmap, imagePath);
+                spannableString.setSpan(imageSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                
+                // 在当前光标位置插入图片
+                int start = Math.max(binding.contentEditText.getSelectionStart(), 0);
+                binding.contentEditText.getText().insert(start, spannableString);
+                
+                // 保存图片路径到 Note 对象
+                if (currentNote.getImagePaths() == null) {
+                    currentNote.setImagePaths(new ArrayList<>());
+                }
+                currentNote.getImagePaths().add("images/" + fileName);
             }
             
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "处理图片失败：" + e.getMessage(), 
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "插入图片失败：" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -461,17 +604,23 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
     // 检查是否有未保存的更改
     private boolean hasUnsavedChanges() {
         String currentTitle = binding.titleEditText.getText().toString().trim();
-        String currentContent = binding.contentEditText.getText().toString().trim();
+        Editable content = binding.contentEditText.getText();
         
         // 如果是新建笔记
         if (currentNote == null) {
-            // 只有当标题或内容不为空时，才认为有未保存的更改
-            return !currentTitle.isEmpty() || !currentContent.isEmpty();
+            return !currentTitle.isEmpty() || content.length() > 0;
         }
         
         // 如果是编辑已有笔记，比较内容是否有变化
+        String savedContent = currentNote.getContent()
+                .replace("&#10;", "\n")  // 处理 HTML 实体
+                .replace("<br>", "\n")   // 处理 HTML 换行标签
+                .replaceAll("<img[^>]+>", "\uFFFC"); // 将图片标签替换为占位符
+                
+        String currentText = content.toString();
+        
         return !currentTitle.equals(currentNote.getTitle()) ||
-               !currentContent.equals(currentNote.getContent());
+               !currentText.equals(savedContent);
     }
 
     private void showMoodPicker() {

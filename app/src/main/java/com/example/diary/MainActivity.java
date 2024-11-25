@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupListeners() {
         adapter.setOnNoteClickListener(note -> {
-            Intent intent = new Intent(this, EditNoteActivity.class);
+            Intent intent = new Intent(MainActivity.this, ViewNoteActivity.class);
             intent.putExtra("note_id", note.getId());
             startActivity(intent);
         });
