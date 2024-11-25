@@ -1,20 +1,22 @@
 package com.example.diary;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import com.example.diary.databinding.ActivitySettingsBinding;
+import static com.example.diary.utils.Constants.PREF_NAME;
+import static com.example.diary.utils.Constants.KEY_DARK_MODE;
+import static com.example.diary.utils.Constants.KEY_AUTO_SAVE;
 
 public class SettingsActivity extends AppCompatActivity {
     private ActivitySettingsBinding binding;
     private SharedPreferences preferences;
-    private static final String PREF_NAME = "diary_settings";
-    private static final String KEY_DARK_MODE = "dark_mode";
-    private static final String KEY_AUTO_SAVE = "auto_save";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,9 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void saveDarkModeSetting(boolean isDarkMode) {
-        preferences.edit().putBoolean(KEY_DARK_MODE, isDarkMode).apply();
+        preferences.edit()
+            .putBoolean(KEY_DARK_MODE, isDarkMode)
+            .commit();
     }
 
     private void saveAutoSaveSetting(boolean isAutoSave) {
@@ -68,10 +72,9 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void applyDarkMode(boolean isDarkMode) {
-        int mode = isDarkMode ? 
-            AppCompatDelegate.MODE_NIGHT_YES : 
-            AppCompatDelegate.MODE_NIGHT_NO;
-        AppCompatDelegate.setDefaultNightMode(mode);
+        AppCompatDelegate.setDefaultNightMode(
+            isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+        );
     }
 
     private void setupVersionInfo() {

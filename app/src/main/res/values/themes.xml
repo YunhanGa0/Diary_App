@@ -8,9 +8,19 @@
         <item name="android:statusBarColor">@color/primary</item>
         
         <!-- 文字样式 -->
-        <item name="android:textColorPrimary">@color/text_primary</item>
-        <item name="android:textColorSecondary">@color/text_secondary</item>
-        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
+        <item name="android:textColorHint">@color/text_hint_light</item>
+        
+        <item name="cardBackgroundColor">@color/card_background_light</item>
+        <item name="actionBarSize">56dp</item>
+        <item name="android:actionBarSize">56dp</item>
+        
+        <!-- 添加底部导航栏颜色 -->
+        <item name="colorSurface">@color/background_light</item>
+        <item name="colorOnSurface">@color/text_primary_light</item>
+        <item name="colorSecondaryContainer">@color/primary_light</item>
+        <item name="colorOnSecondaryContainer">@color/text_primary_light</item>
     </style>
 
     <!-- 格式化按钮样式 -->

@@ -11,13 +11,23 @@ import java.util.List;
 
 public class NoteDao {
     private DiaryDbHelper dbHelper;
+    private SQLiteDatabase db;
 
     public NoteDao(Context context) {
         dbHelper = new DiaryDbHelper(context);
+        db = dbHelper.getWritableDatabase();
+    }
+
+    public void close() {
+        if (db != null && db.isOpen()) {
+            db.close();
+        }
+        if (dbHelper != null) {
+            dbHelper.close();
+        }
     }
 
     public long insertNote(Note note) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(NoteContract.NoteEntry.COLUMN_TITLE, note.getTitle());
         values.put(NoteContract.NoteEntry.COLUMN_CONTENT, note.getContent());
@@ -30,7 +40,6 @@ public class NoteDao {
     }
 
     public int updateNote(Note note) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(NoteContract.NoteEntry.COLUMN_TITLE, note.getTitle());
         values.put(NoteContract.NoteEntry.COLUMN_CONTENT, note.getContent());
@@ -44,7 +53,6 @@ public class NoteDao {
     }
 
     public Note getNoteById(long id) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query(
                 NoteContract.NoteEntry.TABLE_NAME,
                 null,
@@ -65,7 +73,6 @@ public class NoteDao {
 
     public List<Note> getAllNotes() {
         List<Note> notes = new ArrayList<>();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query(
                 NoteContract.NoteEntry.TABLE_NAME,
                 null,
@@ -114,7 +121,6 @@ public class NoteDao {
     }
 
     public void deleteNote(long id) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(NoteContract.NoteEntry.TABLE_NAME,
                 NoteContract.NoteEntry._ID + " = ?",
                 new String[]{String.valueOf(id)});
@@ -122,7 +128,6 @@ public class NoteDao {
 
     public List<Note> searchNotes(String query) {
         List<Note> notes = new ArrayList<>();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
         
         // 获取心情值（如果是心情关键词）
         int moodValue = getMoodValueFromKeyword(query);
@@ -193,7 +198,6 @@ public class NoteDao {
     }
 
     public void saveNote(Note note) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(NoteContract.NoteEntry.COLUMN_TITLE, note.getTitle());
         values.put(NoteContract.NoteEntry.COLUMN_CONTENT, note.getContent());
@@ -220,8 +224,6 @@ public class NoteDao {
 
     public List<Note> getNotesByMood(int mood) {
         List<Note> notes = new ArrayList<>();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        
         Cursor cursor = db.query(
             NoteContract.NoteEntry.TABLE_NAME,
             null,

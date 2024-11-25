@@ -9,10 +9,24 @@
     <color name="surface">#FFFFFF</color>
     <color name="divider">#E0E0E0</color>
     
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
-    <color name="text_hint">#9E9E9E</color>
+    <color name="text_primary_light">#DE000000</color>
+    <color name="text_secondary_light">#99000000</color>
+    <color name="text_hint_light">#61000000</color>
+    <color name="card_background_light">#FFFFFF</color>
+    
+    <color name="primary_dark_theme">#1565C0</color>
+    <color name="primary_dark_dark_theme">#0D47A1</color>
+    <color name="accent_dark_theme">#FF80AB</color>
+    <color name="background_dark">#121212</color>
+    <color name="text_primary_dark">#DEFFFFFF</color>
+    <color name="text_secondary_dark">#99FFFFFF</color>
+    <color name="text_hint_dark">#61FFFFFF</color>
+    <color name="card_background_dark">#1E1E1E</color>
     
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+    
+    <color name="text_primary">@color/text_primary_light</color>
+    <color name="text_secondary">@color/text_secondary_light</color>
+    <color name="text_hint">@color/text_hint_light</color>
 </resources>
