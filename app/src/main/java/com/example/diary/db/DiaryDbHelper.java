@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class DiaryDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "diary.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public DiaryDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,6 +27,7 @@ public class DiaryDbHelper extends SQLiteOpenHelper {
                 NoteContract.NoteEntry.COLUMN_UPDATE_TIME + " INTEGER, " +
                 NoteContract.NoteEntry.COLUMN_CATEGORY + " TEXT, " +
                 NoteContract.NoteEntry.COLUMN_IS_ENCRYPTED + " INTEGER DEFAULT 0, " +
+                NoteContract.NoteEntry.COLUMN_PASSWORD + " TEXT, " +
                 NoteContract.NoteEntry.COLUMN_IMAGE_PATHS + " TEXT, " +
                 NoteContract.NoteEntry.COLUMN_MOOD + " INTEGER DEFAULT 0);";
 
@@ -35,8 +36,8 @@ public class DiaryDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 5) {
-            // 检查列是否存在，不存在则添加
+        if (oldVersion < 6) {
+            // 检查列是否存在
             Cursor cursor = db.rawQuery("PRAGMA table_info(" + 
                     NoteContract.NoteEntry.TABLE_NAME + ")", null);
             Set<String> existingColumns = new HashSet<>();
@@ -48,10 +49,17 @@ public class DiaryDbHelper extends SQLiteOpenHelper {
                 cursor.close();
             }
 
-            // 添加新的 mood 列
-            if (!existingColumns.contains(NoteContract.NoteEntry.COLUMN_MOOD)) {
+            // 添加密码列
+            if (!existingColumns.contains(NoteContract.NoteEntry.COLUMN_PASSWORD)) {
                 db.execSQL("ALTER TABLE " + NoteContract.NoteEntry.TABLE_NAME + 
-                        " ADD COLUMN " + NoteContract.NoteEntry.COLUMN_MOOD + 
+                        " ADD COLUMN " + NoteContract.NoteEntry.COLUMN_PASSWORD + 
+                        " TEXT");
+            }
+
+            // 添加加密标志列
+            if (!existingColumns.contains(NoteContract.NoteEntry.COLUMN_IS_ENCRYPTED)) {
+                db.execSQL("ALTER TABLE " + NoteContract.NoteEntry.TABLE_NAME + 
+                        " ADD COLUMN " + NoteContract.NoteEntry.COLUMN_IS_ENCRYPTED + 
                         " INTEGER DEFAULT 0");
             }
         }

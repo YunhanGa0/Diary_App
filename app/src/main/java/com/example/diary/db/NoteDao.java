@@ -243,4 +243,33 @@ public class NoteDao {
         
         return notes;
     }
+
+    public void updateNotePassword(long noteId, String password) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(NoteContract.NoteEntry.COLUMN_PASSWORD, password);
+        values.put(NoteContract.NoteEntry.COLUMN_IS_ENCRYPTED, 
+                password != null && !password.isEmpty() ? 1 : 0);
+        
+        db.update(NoteContract.NoteEntry.TABLE_NAME, values,
+                NoteContract.NoteEntry._ID + " = ?",
+                new String[]{String.valueOf(noteId)});
+    }
+
+    public String getNotePassword(long noteId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query(NoteContract.NoteEntry.TABLE_NAME,
+                new String[]{NoteContract.NoteEntry.COLUMN_PASSWORD},
+                NoteContract.NoteEntry._ID + " = ?",
+                new String[]{String.valueOf(noteId)},
+                null, null, null);
+                
+        String password = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            password = cursor.getString(cursor.getColumnIndexOrThrow(
+                    NoteContract.NoteEntry.COLUMN_PASSWORD));
+            cursor.close();
+        }
+        return password;
+    }
 } 

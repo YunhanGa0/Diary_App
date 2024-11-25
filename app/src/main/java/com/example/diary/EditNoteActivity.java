@@ -9,6 +9,8 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -415,6 +417,9 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
         } else if (id == R.id.action_delete) {
             showDeleteConfirmDialog();
             return true;
+        } else if (id == R.id.action_set_password) {
+            showSetPasswordDialog();
+            return true;
         }
         
         return super.onOptionsItemSelected(item);
@@ -614,7 +619,7 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
         // 如果是编辑已有笔记，比较内容是否有变化
         String savedContent = currentNote.getContent()
                 .replace("&#10;", "\n")  // 处理 HTML 实体
-                .replace("<br>", "\n")   // 处理 HTML 换行标签
+                .replace("<br>", "\n")   // 处理 HTML 换行标
                 .replaceAll("<img[^>]+>", "\uFFFC"); // 将图片标签替换为占位符
                 
         String currentText = content.toString();
@@ -658,5 +663,53 @@ public class EditNoteActivity extends AppCompatActivity implements RichEditText.
                 moodText = "未知心情";
         }
         Toast.makeText(this, "您选择了：" + moodText, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showSetPasswordDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_set_password, null);
+        EditText passwordInput = dialogView.findViewById(R.id.passwordInput);
+        CheckBox removePassword = dialogView.findViewById(R.id.removePassword);
+        
+        // 如果已经设置了密码，显示移除密码选项
+        removePassword.setVisibility(
+            currentNote != null && currentNote.isEncrypted() ? View.VISIBLE : View.GONE
+        );
+        
+        AlertDialog dialog = new AlertDialog.Builder(this)
+            .setTitle("设置密码")
+            .setView(dialogView)
+            .setPositiveButton("确定", (d, w) -> {
+                String password = passwordInput.getText().toString();
+                Log.d("EditNoteActivity", "Setting password: " + password);
+                
+                if (currentNote == null) {
+                    currentNote = new Note();
+                    currentNote.setCreateTime(System.currentTimeMillis());
+                }
+                
+                if (removePassword.isChecked()) {
+                    Log.d("EditNoteActivity", "Removing password");
+                    currentNote.setPassword(null);
+                    currentNote.setEncrypted(false);
+                    if (currentNote.getId() != 0) {
+                        noteDao.updateNotePassword(currentNote.getId(), null);
+                    }
+                    Toast.makeText(this, "密码已移除", Toast.LENGTH_SHORT).show();
+                } else if (!password.isEmpty()) {
+                    Log.d("EditNoteActivity", "Setting new password: " + password);
+                    currentNote.setPassword(password);
+                    currentNote.setEncrypted(true);
+                    // 先保存笔记以获取ID
+                    if (currentNote.getId() == 0) {
+                        saveNote();
+                    }
+                    noteDao.updateNotePassword(currentNote.getId(), password);
+                    Toast.makeText(this, "密码已设置", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("取消", null)
+            .create();
+            
+        dialog.show();
     }
 }

@@ -15,6 +15,7 @@ public class Note {
     private boolean isEncrypted;
     private List<String> imagePaths;
     private int mood; // 0-5 表示不同心情等级
+    private String password;
 
     public Note() {
         this.createTime = System.currentTimeMillis();
@@ -97,5 +98,13 @@ public class Note {
 
     public void setMood(int mood) {
         this.mood = mood;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

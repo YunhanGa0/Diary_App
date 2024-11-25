@@ -9,6 +9,9 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -22,6 +25,8 @@ import android.text.Html.ImageGetter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import java.io.File;
+
+import android.app.AlertDialog;
 
 public class ViewNoteActivity extends AppCompatActivity {
     private ActivityViewNoteBinding binding;
@@ -60,6 +65,53 @@ public class ViewNoteActivity extends AppCompatActivity {
 
     private void loadNote(long noteId) {
         currentNote = noteDao.getNoteById(noteId);
+        if (currentNote == null) {
+            Toast.makeText(this, "笔记不存在", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // 如果笔记有密码保护，显示密码输入对话框
+        if (currentNote.isEncrypted()) {
+            showPasswordDialog();
+            return;
+        }
+
+        // 没有密码保护，直接显示笔记内容
+        displayNote();
+    }
+
+    private void showPasswordDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_verify_password, null);
+        EditText passwordInput = dialogView.findViewById(R.id.passwordInput);
+        
+        AlertDialog dialog = new AlertDialog.Builder(this)
+            .setTitle("输入密码")
+            .setView(dialogView)
+            .setCancelable(false)
+            .setPositiveButton("确定", (d, w) -> {
+                String inputPassword = passwordInput.getText().toString();
+                String savedPassword = noteDao.getNotePassword(currentNote.getId());
+                
+                Log.d("ViewNoteActivity", "Input password: " + inputPassword);
+                Log.d("ViewNoteActivity", "Saved password: " + savedPassword);
+                
+                if (inputPassword.equals(savedPassword)) {
+                    Log.d("ViewNoteActivity", "Password correct");
+                    displayNote();
+                } else {
+                    Log.d("ViewNoteActivity", "Password incorrect");
+                    Toast.makeText(this, "密码错误", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            })
+            .setNegativeButton("取消", (d, w) -> finish())
+            .create();
+            
+        dialog.show();
+    }
+
+    private void displayNote() {
         if (currentNote != null) {
             binding.titleText.setText(currentNote.getTitle());
             binding.timeText.setText(currentNote.getFormattedTime());

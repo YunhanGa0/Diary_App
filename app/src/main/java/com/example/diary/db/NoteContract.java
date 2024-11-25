@@ -12,8 +12,9 @@ public final class NoteContract {
         public static final String COLUMN_CREATE_TIME = "create_time";
         public static final String COLUMN_UPDATE_TIME = "update_time";
         public static final String COLUMN_CATEGORY = "category";
-        public static final String COLUMN_IS_ENCRYPTED = "is_encrypted";
         public static final String COLUMN_IMAGE_PATHS = "image_paths";
         public static final String COLUMN_MOOD = "mood";
+        public static final String COLUMN_PASSWORD = "password";
+        public static final String COLUMN_IS_ENCRYPTED = "is_encrypted";
     }
 } 
