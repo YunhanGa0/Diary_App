@@ -1,0 +1,82 @@
+@startuml Diary App Package Diagram
+
+skinparam packageStyle rectangle
+
+package "com.example.diary" {
+    package "ui" {
+        package "activities" {
+            [MainActivity]
+            [EditNoteActivity]
+            [ViewNoteActivity]
+            [SearchActivity]
+            [SettingsActivity]
+        }
+
+        package "dialogs" {
+            [ColorPickerDialog]
+            [MoodPickerDialog]
+            [PasswordDialog]
+        }
+
+        package "adapters" {
+            [NoteListAdapter]
+            [NoteGridAdapter]
+        }
+
+        package "widgets" {
+            [RichEditText]
+            [AudioPlayer]
+            [FormatToolbar]
+        }
+    }
+
+    package "data" {
+        package "database" {
+            [NoteDatabase]
+            [NoteDao]
+        }
+
+        package "models" {
+            [Note]
+            [Mood]
+        }
+
+        package "repository" {
+            [NoteRepository]
+        }
+    }
+
+    package "utils" {
+        [TextFormatter]
+        [TimeUtils]
+        [SecurityUtils]
+    }
+
+    package "databinding" {
+        [ActivityBindings]
+        [DialogBindings]
+        [LayoutBindings]
+    }
+}
+
+' 定义依赖关系
+activities ..> models
+activities ..> repository
+activities .-up-.> widgets
+activities ..> dialogs
+activities ..> adapters
+
+adapters ..> models
+adapters .-down-.> databinding
+
+repository ..> database
+repository ..> models
+
+database ..> models
+
+dialogs .-down-.> databinding
+activities .-down-.> databinding
+
+widgets ..> utils
+
+@enduml
