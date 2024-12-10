@@ -1,0 +1,29 @@
+@startuml Database Schema
+title: Database Schema
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b><u>x</u></b>
+
+table(notes) {
+    primary_key(id): INTEGER
+    title: TEXT NOT NULL
+    content: TEXT
+    create_time: INTEGER
+    update_time: INTEGER
+    category: TEXT
+    is_encrypted: INTEGER DEFAULT 0
+    password: TEXT
+    image_paths: TEXT
+    mood: INTEGER DEFAULT 0
+}
+
+note bottom of notes
+  mood values:
+  0 = very sad
+  1 = sad
+  2 = neutral
+  3 = happy
+  4 = very happy
+  5 = angry
+end note
+
+@endumlenduml

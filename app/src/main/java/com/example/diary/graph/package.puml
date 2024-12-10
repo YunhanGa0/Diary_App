@@ -2,7 +2,7 @@
 
 skinparam packageStyle rectangle
 
-package "com.example.diary" {
+package "Diary" {
     package "ui" {
         package "activities" {
             [MainActivity]

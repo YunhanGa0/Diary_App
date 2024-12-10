@@ -149,6 +149,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, EditNoteActivity.class);
                 startActivity(intent);
                 return false; // 不选中该项
+            } else if (itemId == R.id.navigation_chat) {
+                Intent intent = new Intent(this, ChatActivity.class);
+                startActivity(intent);
+                return false; // 不选中该项
             } else if (itemId == R.id.navigation_settings) {
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
