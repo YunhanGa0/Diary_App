@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/dialog_background">
+    android:background="?attr/colorSurface">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="选择心情"
         android:textSize="20sp"
-        android:textColor="@color/text_primary"
+        android:textColor="?android:attr/textColorPrimary"
         android:textStyle="bold"
         android:gravity="center"
         android:padding="20dp"/>
@@ -19,7 +19,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/divider"/>
+        android:background="?attr/colorOutline"/>
 
     <GridLayout
         android:id="@+id/moodGrid"
@@ -32,32 +32,38 @@
         <ImageView
             android:id="@id/mood_0"
             style="@style/MoodImageStyle"
-            android:src="@drawable/mood_0"/>
+            android:src="@drawable/mood_0"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageView
             android:id="@id/mood_1"
             style="@style/MoodImageStyle"
-            android:src="@drawable/mood_1"/>
+            android:src="@drawable/mood_1"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageView
             android:id="@id/mood_2"
             style="@style/MoodImageStyle"
-            android:src="@drawable/mood_2"/>
+            android:src="@drawable/mood_2"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageView
             android:id="@id/mood_3"
             style="@style/MoodImageStyle"
-            android:src="@drawable/mood_3"/>
+            android:src="@drawable/mood_3"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageView
             android:id="@id/mood_4"
             style="@style/MoodImageStyle"
-            android:src="@drawable/mood_4"/>
+            android:src="@drawable/mood_4"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageView
             android:id="@id/mood_5"
             style="@style/MoodImageStyle"
-            android:src="@drawable/mood_5"/>
+            android:src="@drawable/mood_5"
+            android:tint="?android:attr/textColorSecondary"/>
 
     </GridLayout>
 </LinearLayout> 

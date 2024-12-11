@@ -24,7 +24,7 @@ public class MoodPickerDialog extends BottomSheetDialog {
     }
 
     public MoodPickerDialog(@NonNull Context context, OnMoodSelectedListener listener) {
-        super(context);
+        super(context, R.style.Theme_Diary_BottomSheetDialog);
         this.listener = listener;
     }
 
@@ -34,11 +34,15 @@ public class MoodPickerDialog extends BottomSheetDialog {
         setContentView(R.layout.dialog_mood_picker);
 
         GridLayout gridLayout = findViewById(R.id.moodGrid);
+        if (gridLayout == null) return;
         
         for (int i = 0; i < moodDrawables.length; i++) {
-            ImageView moodView = gridLayout.findViewById(
-                    getContext().getResources().getIdentifier(
-                            "mood_" + i, "id", getContext().getPackageName()));
+            int resId = getContext().getResources().getIdentifier(
+                    "mood_" + i, "id", getContext().getPackageName());
+            if (resId == 0) continue;
+            
+            ImageView moodView = gridLayout.findViewById(resId);
+            if (moodView == null) continue;
             
             final int mood = i;
             moodView.setOnClickListener(v -> {

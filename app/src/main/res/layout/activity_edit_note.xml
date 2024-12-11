@@ -21,7 +21,9 @@
         android:hint="标题"
         android:padding="16dp"
         android:background="@null"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textColorHint="?android:attr/textColorHint"/>
 
     <com.example.diary.widget.RichEditText
         android:id="@+id/contentEditText"
@@ -31,54 +33,61 @@
         android:gravity="top|start"
         android:padding="16dp"
         android:background="@null"
-        android:hint="开始输入..."/>
+        android:hint="开始输入..."
+        android:textColor="?android:attr/textColorPrimary"
+        android:textColorHint="?android:attr/textColorHint"/>
 
     <LinearLayout
         android:id="@+id/formatBar"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:orientation="horizontal"
-        android:background="#F5F5F5"
+        android:background="?attr/colorSurface"
         android:gravity="center_vertical">
 
         <ImageButton
             android:id="@+id/boldButton"
             style="@style/FormatButton"
             android:src="@drawable/ic_format_bold"
-            android:contentDescription="粗体"/>
+            android:contentDescription="粗体"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageButton
             android:id="@+id/italicButton"
             style="@style/FormatButton"
             android:src="@drawable/ic_format_italic"
-            android:contentDescription="斜体"/>
+            android:contentDescription="斜体"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageButton
             android:id="@+id/underlineButton"
             style="@style/FormatButton"
             android:src="@drawable/ic_format_underline"
-            android:contentDescription="下划线"/>
+            android:contentDescription="下划线"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageButton
             android:id="@+id/textSizeButton"
             style="@style/FormatButton"
             android:src="@drawable/ic_format_size"
-            android:contentDescription="字号"/>
+            android:contentDescription="字号"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageButton
             android:id="@+id/textColorButton"
             style="@style/FormatButton"
             android:src="@drawable/ic_format_color"
-            android:contentDescription="颜色"/>
+            android:contentDescription="颜色"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageButton
             android:id="@+id/btnAddImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/ic_image"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:onClick=""/>
+            android:padding="12dp"
+            android:tint="?android:attr/textColorSecondary"/>
 
         <ImageButton
             android:id="@+id/btnMood"
@@ -87,7 +96,8 @@
             android:src="@drawable/ic_mood"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginStart="8dp"
+            android:tint="?android:attr/textColorSecondary"/>
     </LinearLayout>
 
 </LinearLayout>

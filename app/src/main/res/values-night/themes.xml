@@ -1,27 +1,25 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- 深色主题 -->
-    <style name="Theme.Diary" parent="Theme.Material3.DayNight.NoActionBar">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Diary" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/primary_dark_theme</item>
         <item name="colorPrimaryDark">@color/primary_dark_dark_theme</item>
         <item name="colorAccent">@color/accent_dark_theme</item>
         <item name="android:windowBackground">@color/background_dark</item>
         <item name="android:statusBarColor">@color/primary_dark_theme</item>
         
+        <!-- 文字样式 -->
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
         
         <item name="cardBackgroundColor">@color/card_background_dark</item>
-        <item name="colorSurface">@color/card_background_dark</item>
-        <item name="colorOnSurface">@color/text_primary_dark</item>
-        <item name="colorOnPrimary">@color/white</item>
         <item name="actionBarSize">56dp</item>
         <item name="android:actionBarSize">56dp</item>
         
         <!-- 添加底部导航栏颜色 -->
         <item name="colorSurface">@color/background_dark</item>
         <item name="colorOnSurface">@color/text_primary_dark</item>
-        <item name="colorSecondaryContainer">@color/primary_dark_theme</item>
+        <item name="colorSecondaryContainer">@color/primary_dark_dark_theme</item>
         <item name="colorOnSecondaryContainer">@color/text_primary_dark</item>
     </style>
 </resources>
